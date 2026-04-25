@@ -1,0 +1,20 @@
+name: AMALS
+description: Adaptive Multi-Agent Life Simulator - Schedule Conflict Scenario
+version: 1.0.0
+entry_point: env.environment:AMALSEnvironment
+
+observation_space:
+  type: dict
+  properties:
+    time: { type: string }
+    meeting: { type: boolean }
+    family_dinner: { type: boolean }
+    budget: { type: integer }
+    stress: { type: float }
+
+action_space:
+  type: dict
+  properties:
+    decision:
+      type: string
+      enum: ["attend_meeting", "attend_dinner", "balance_both"]
