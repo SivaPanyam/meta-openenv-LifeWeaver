@@ -1,106 +1,86 @@
 # LifeWeaver 🧬
 ### Adaptive Multi-Agent Life Simulator (AMALS)
 
-**LifeWeaver** is a high-fidelity Reinforcement Learning (RL) environment designed to simulate real-world decision-making under uncertainty. It challenges agents to navigate the complex trade-offs between professional commitments and personal well-being through a multi-step, partially observable process.
-
----
-
-## 🚩 The Problem
-Traditional RL environments often focus on static, single-step decisions or deterministic outcomes. In reality, life is:
-- **Sequential:** Decisions unfold over time.
-- **Uncertain:** Success is not guaranteed; external factors (stress, travel) influence outcomes.
-- **Dynamic:** Failures happen, and the ability to recover is as important as the initial plan.
-
-## 💡 The Solution
-LifeWeaver introduces a **3-Phase Episode** structure that forces agents to plan, execute, and adapt. It uses a sophisticated reward system that penalizes both failure and unnecessary over-correction, training agents to be efficient yet resilient.
-
----
-
-## 🏗 Environment Design
-The environment follows a rigorous **OpenEnv** architecture, structured into three distinct phases:
-
-1.  **Planning Phase:** The agent selects an initial intent (`attend_meeting`, `attend_dinner`, or `balance_both`). This is logged via a simulated **Calendar MCP Server**.
-2.  **Execution Phase:** The environment calculates a success probability influenced by the agent's `stress` and `travel_time`. The outcome is sampled as `success`, `partial`, or `failure`.
-3.  **Recovery Phase:** If things go wrong, the agent must choose a recovery action (`reschedule`, `delay`, or `apologize`). 
-
-**Note:** The environment is **Partially Observable**. The agent cannot see the outcome of its actions until the Execution Phase is complete, preventing information leakage and ensuring realistic training.
+**LifeWeaver** is a high-fidelity Reinforcement Learning (RL) environment and smart assistant designed to simulate and solve real-world decision-making under uncertainty. It challenges agents to navigate complex trade-offs between professional commitments and personal well-being through a multi-step, partially observable process.
 
 ---
 
 ## 🚀 Key Features
-- **Context-Aware Rewards:** Prioritizes outcomes based on randomized task importance (Low/Medium/High).
-- **Uncertainty Engine:** Realistic stochasticity where high stress increases the chance of failure.
-- **Adaptive Recovery:** Incentivizes intelligent mitigation over blind action.
-- **MCP Integration:** Uses Model Context Protocol (MCP) simulations for tool-augmented decision making.
+- **3-Phase Episode Flow:** Planning → Execution (Stochastic) → Recovery.
+- **Multi-Source Event Ingestion:** Tasks flow from **Email**, **Conversations**, **Calendars**, and **Manual** inputs.
+- **Partial Observability:** The agent acts on current knowledge, with outcomes hidden until execution is complete.
+- **Multi-Agent Coordination:** Specialized **Calendar** and **Email** agents orchestrated by a central **Coordinator**.
+- **Modern Full-Stack UI:** A responsive React + Tailwind calendar interface powered by a FastAPI backend.
 
 ---
 
-## 📊 Results
-We compared a **Random Baseline** against a **Learned Policy** using an Exploration-Exploitation strategy over 200 episodes.
+## 📊 Learning Performance
+Our system demonstrates measurable improvement in decision-making through sequential reasoning:
 
-| Metric | Random Baseline | Learned Policy | Improvement |
+| Metric | Random Policy | Learned Policy | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Avg. Reward** | ~0.57 | **~0.81** | **+42.5%** |
-| **Success Rate** | ~60% | **~85%** | **+25%** |
-| **Recovery Efficiency** | Low | **High (Context-Based)** | Significant |
+| **Avg. Reward** | ~0.57 | **~0.81** | **+42.1%** |
+| **Strategy** | Arbitrary | **balance_both → delay_dinner** | Strategic |
 
-### Performance Visualization
-The following graph demonstrates the agent's ability to converge on the optimal strategy by mastering both the initial planning and the necessary recovery steps.
+### Key Observations:
+- **Resilience:** The agent converges to a stable strategy that prioritizes high-impact tasks while maintaining social flexibility.
+- **Adaptability:** Achieves a high success rate even under stochastic conditions (stress/travel time penalties).
+- **Compromise:** The learned strategy (`balance_both`) shows a preference for adaptive recovery rather than rigid, single-pillar decision making.
 
-![Baseline vs Learned](baseline_comparison.png)
-
----
-
-## 🛠 Why This Matters
-LifeWeaver serves as a bridge between abstract RL tasks and real-world AI assistants. By training models in environments that value **resilience** and **contextual reasoning**, we move closer to AI that can truly manage the complexities of human life.
+### Performance Visuals
+![Reward Evolution](reward_plot.png)
+*Figure 1: Cumulative reward growth over 200 training episodes.*
 
 ---
 
-## 💻 How to Run
-
-### 1. Install Dependencies
-```bash
-pip install -r amals-env/requirements.txt
-```
-
-### 2. Verify Environment
-```bash
-python amals-env/test_multistep_env.py
-```
-
-### 3. Run Training & Comparison
-```bash
-python amals-env/train/train_multistep.py
-python amals-env/train/compare_baseline.py
-```
-
----
-
-## 📁 Project Structure
+## 🏗 System Architecture
 ```text
 LifeWeaver/
-├── amals-env/
-│   ├── env/               # Core Environment (Logic, Rewards, Scenarios)
-│   ├── mcp_local/         # Simulated MCP Tool Servers
-│   ├── train/             # Training & Comparison Scripts
-│   ├── openenv.yaml       # OpenEnv Specification
-│   └── test_env.py        # Validation Suites
-├── README.md              # Project Documentation
-└── GEMINI.md              # AI Agent Instructions
+├── amals-env/            # Core RL Logic
+│   ├── env/              # Environment, Rewards, Scenarios
+│   ├── mcp_local/        # Simulated Tool Servers
+│   └── train/            # Training & Evaluation Suites
+├── backend/              # FastAPI Server
+│   └── agents/           # Multi-Agent Logic (Calendar, Email, Coordinator)
+├── frontend/             # React + Vite + Tailwind UI
+└── README.md             # Project Documentation
 ```
 
 ---
 
-## 🔮 Future Work
-- **LLM Integration:** Using TRL/Unsloth to fine-tune LLMs on these trajectories.
-- **Multi-Agent Support:** Simulating conflicts between multiple agents sharing resources.
-- **Complex Tools:** Adding Email and Finance MCP servers for broader simulation.
+## 🛠 Installation & Setup
 
-## 🏁 Conclusion
-LifeWeaver demonstrates that with the right environment design, agents can learn to handle not just success, but also the inevitable failures of a complex life. It is a robust foundation for building the next generation of adaptive, multi-agent simulators.
+### 1. Prerequisites
+```bash
+pip install fastapi uvicorn matplotlib pyyaml requests
+cd frontend && npm install
+```
+
+### 2. Start the Backend
+```bash
+python backend/server.py
+```
+*(Runs at http://localhost:8000)*
+
+### 3. Start the Frontend
+```bash
+cd frontend
+npm run dev
+```
+*(Runs at http://localhost:5173)*
+
+### 4. Run Evaluation
+To re-verify model performance:
+```bash
+python amals-env/train/evaluate_model.py
+```
 
 ---
 
-## 🔗 Links
-- **Repository:** [GitHub](https://github.com/SivaPanyam/meta-openenv-LifeWeaver)
-- **Documentation:** [Wiki](https://github.com/SivaPanyam/meta-openenv-LifeWeaver/wiki)
+## 🏁 Conclusion
+LifeWeaver demonstrates that adaptive, multi-agent systems can master the complexities of a dynamic schedule. By combining reinforcement learning with a modern interactive interface, it provides a robust foundation for the next generation of AI-powered life assistants.
+
+---
+
+## 🔗 Repository
+- **GitHub:** [https://github.com/SivaPanyam/meta-openenv-LifeWeaver](https://github.com/SivaPanyam/meta-openenv-LifeWeaver)
