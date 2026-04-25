@@ -1,7 +1,6 @@
 import streamlit as st
 import sys
 import os
-import pandas as pd
 from datetime import datetime, timedelta
 
 # Add amals-env to path to allow imports from env
@@ -13,16 +12,18 @@ from env.environment import AMALSEnvironment
 # --- Styling ---
 st.set_page_config(page_title="LifeWeaver Assistant", page_icon="📅", layout="centered")
 
+# Minimal CSS for layout fixes
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
-    .stButton>button { width: 100%; border-radius: 20px; height: 3em; background-color: #007bff; color: white; }
-    .event-card { padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #007bff; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .event-conflict { border-left: 5px solid #dc3545; background: #fff5f5; }
-    .event-resolved { border-left: 5px solid #28a745; background: #f8fff9; }
-    .priority-high { color: #dc3545; font-weight: bold; }
-    .priority-medium { color: #fd7e14; font-weight: bold; }
-    .priority-low { color: #6c757d; font-weight: bold; }
+    .priority-badge { 
+        float: right; 
+        font-size: 0.8em; 
+        padding: 2px 8px; 
+        border-radius: 10px; 
+        background: #eee;
+        color: #333;
+    }
+    .stMarkdown p { margin-bottom: 0px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -33,8 +34,8 @@ def get_initial_events():
     
     # Construct a realistic day schedule based on environment state
     events = [
-        {"id": 1, "title": "Family Dinner", "time": "19:30", "priority": obs['dinner_priority'], "flexible": obs['dinner_flexible']},
-        {"id": 2, "title": "Project Meeting", "time": "20:00", "priority": obs['meeting_priority'], "flexible": False},
+        {"id": 1, "title": "Family Dinner", "time": "19:30", "priority": obs.get('dinner_priority', 'medium'), "flexible": obs.get('dinner_flexible', False)},
+        {"id": 2, "title": "Project Meeting", "time": "20:00", "priority": obs.get('meeting_priority', 'high'), "flexible": False},
         {"id": 3, "title": "Gym Session", "time": "18:00", "priority": "low", "flexible": True}
     ]
     return events, obs
@@ -42,28 +43,19 @@ def get_initial_events():
 def run_agent(events):
     optimized = []
     reasoning = []
-    
-    # Sort by priority for decision making
     prio_map = {"high": 3, "medium": 2, "low": 1}
-    sorted_events = sorted(events, key=lambda x: prio_map[x['priority']], reverse=True)
-    
-    busy_until = None
-    
-    # Pre-sort by original time for processing
-    events_chronological = sorted(events, key=lambda x: x['time'])
-    
-    # Simplified optimization:
-    # 1. Keep non-flexible High Priority events fixed.
-    # 2. Shift others if they conflict.
     
     processed_events = []
     busy_slots = [] # (start, end)
     
-    # First pass: High priority fixed
-    for event in sorted(events, key=lambda x: prio_map[x['priority']], reverse=True):
+    # Sort by priority to decide what stays fixed
+    sorted_by_prio = sorted(events, key=lambda x: prio_map.get(x['priority'], 1), reverse=True)
+    
+    for event in sorted_by_prio:
         start = datetime.strptime(event['time'], "%H:%M")
         end = start + timedelta(hours=1)
         
+        # Check overlap with already fixed slots
         conflict = any(not (end <= s or start >= e) for s, e in busy_slots)
         
         new_event = event.copy()
@@ -75,10 +67,10 @@ def run_agent(events):
                     end = start + timedelta(hours=1)
                 new_event['time'] = start.strftime("%H:%M")
                 new_event['status'] = "Rescheduled"
-                reasoning.append(f"Moved '{event['title']}' to {new_event['time']} to resolve conflict.")
+                reasoning.append(f"✅ Moved **{event['title']}** to {new_event['time']} (Flexible).")
             else:
-                new_event['status'] = "Conflict Kept"
-                reasoning.append(f"Retained overlap for '{event['title']}' due to {event['priority']} priority.")
+                new_event['status'] = "Overlapping"
+                reasoning.append(f"⚠ Conflicting task **{event['title']}** kept at {event['time']} due to high priority.")
         else:
             new_event['status'] = "Confirmed"
             
@@ -94,65 +86,60 @@ if "events" not in st.session_state:
     st.session_state.reasoning = []
 
 # --- Header ---
-st.title("LifeWeaver — Smart Calendar Agent")
-st.markdown("##### AI-powered schedule optimization")
+st.title("LifeWeaver — Smart Assistant")
+st.markdown("### 🤖 AI-Powered Life Optimization")
 
 # --- Layout ---
 col1, col2 = st.columns([2, 1])
 
 with col2:
-    st.write("### Controls")
-    if st.button("🔄 Refresh Schedule"):
+    st.write("#### Controls")
+    if st.button("🔄 New Day", type="primary", use_container_width=True):
         st.session_state.events, st.session_state.obs = get_initial_events()
         st.session_state.optimized = None
         st.session_state.reasoning = []
         st.rerun()
         
-    if st.button("🤖 Optimize Schedule", type="primary"):
+    if st.button("🤖 AI Optimize", use_container_width=True):
         st.session_state.optimized, st.session_state.reasoning = run_agent(st.session_state.events)
         st.rerun()
-
-    show_reasoning = st.toggle("Show Agent Decisions", value=True)
+    
+    st.divider()
+    st.write("**Environment Context:**")
+    st.write(f"- Stress: {st.session_state.obs.get('stress', 0):.2f}")
+    st.write(f"- Travel Time: {st.session_state.obs.get('travel_time', 0)}m")
 
 with col1:
     display_list = st.session_state.optimized if st.session_state.optimized else st.session_state.events
-    
-    st.write(f"### {'Optimized' if st.session_state.optimized else 'Current'} Day View")
-    
-    # Check for conflicts in current view (simple O(n^2) for 3 events)
-    has_conflict = False
+    st.write(f"#### {'Optimized' if st.session_state.optimized else 'Current'} Schedule")
+
+    # Conflict Check for Display
     if not st.session_state.optimized:
-        for i, e1 in enumerate(display_list):
-            for j, e2 in enumerate(display_list):
-                if i != j and e1['time'] == e2['time']:
-                    has_conflict = True
-        if has_conflict:
-            st.error("⚠️ Conflict detected in schedule")
+        times = [e['time'] for e in display_list]
+        if len(times) != len(set(times)):
+            st.error("🚨 **Conflict:** Overlapping tasks detected.")
 
     for event in display_list:
-        p_class = f"priority-{event['priority']}"
-        status_tag = f" — <i>{event['status']}</i>" if 'status' in event else ""
-        card_class = "event-card"
-        
-        # Visual cues for state
-        if not st.session_state.optimized and has_conflict and event['time'] in ["19:30", "20:00"]:
-            card_class += " event-conflict"
-        elif st.session_state.optimized:
-            card_class += " event-resolved"
+        with st.container(border=True):
+            cols = st.columns([1, 4, 1])
+            cols[0].write(f"**{event['time']}**")
+            cols[1].write(f"**{event['title']}**")
             
-        st.markdown(f"""
-            <div class="{card_class}">
-                <span style="float:right;" class="{p_class}">{event['priority'].upper()}</span>
-                <strong>{event['time']}</strong> | {event['title']}{status_tag}
-            </div>
-        """, unsafe_allow_html=True)
+            p_label = event['priority'].upper()
+            cols[2].markdown(f"<span class='priority-badge'>{p_label}</span>", unsafe_allow_html=True)
+            
+            if 'status' in event and event['status'] != "Confirmed":
+                if event['status'] == "Rescheduled":
+                    st.caption(f"✨ {event['status']}")
+                else:
+                    st.caption(f"⚠ {event['status']}")
 
-# --- Reasoning Panel ---
-if show_reasoning and st.session_state.reasoning:
+# --- Reasoning ---
+if st.session_state.reasoning:
     st.divider()
-    st.write("### 🤖 Why this plan?")
+    st.write("#### 🧠 AI Decision Reasoning")
     for r in st.session_state.reasoning:
-        st.markdown(f"- {r}")
+        st.write(r)
 
 st.divider()
-st.caption("Powered by AMALS (Adaptive Multi-Agent Life Simulator) RL Environment")
+st.caption("Powered by AMALS RL Environment | Streamlit Native UI")
