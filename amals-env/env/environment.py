@@ -33,7 +33,8 @@ class AMALSEnvironment:
             "stress": round(self.current_state.stress, 2),
             "travel_time": self.current_state.travel_time,
             "meeting_priority": self.current_state.meeting_priority,
-            "dinner_priority": self.current_state.dinner_priority
+            "dinner_priority": self.current_state.dinner_priority,
+            "dinner_flexible": self.current_state.dinner_flexible
         }
         
         # Step-Based Visibility Rules
