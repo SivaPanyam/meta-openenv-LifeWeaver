@@ -44,41 +44,56 @@ def find_available_slot(events, duration, date_str, buffer=15):
 
     return format_minutes(current_time)
 
-def move_to_next_day(state, event_type):
+def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
     """
-    Moves an event to the next day and finds an available slot.
+    Moves an event to the FIRST available day that isn't overcrowded.
     """
     new_state = copy.deepcopy(state)
     events = new_state.get("events", [])
     
-    target_event = None
-    for event in events:
-        if event["type"] == event_type:
-            target_event = event
-            break
-    
+    target_event = next((e for e in events if e["type"] == event_type), None)
     if not target_event:
         return state, {"status": "event_not_found"}
 
-    # 1. Calculate new date
-    current_date = datetime.strptime(target_event["date"], "%Y-%m-%d")
-    next_day = current_date + timedelta(days=1)
-    next_day_str = next_day.strftime("%Y-%m-%d")
+    current_date_obj = datetime.strptime(target_event["date"], "%Y-%m-%d")
+    found_day = None
+    final_time = None
 
-    # 2. Find slot on next day
-    new_time = find_available_slot(events, target_event.get("duration", 60), next_day_str)
-    
-    # 3. Update event
-    target_event["date"] = next_day_str
-    target_event["time"] = new_time
-    target_event["status"] = "moved_to_next_day"
+    # Search for the first viable day within the next 7 days
+    for i in range(1, max_lookahead + 1):
+        candidate_date = current_date_obj + timedelta(days=i)
+        candidate_str = candidate_date.strftime("%Y-%m-%d")
+        
+        # 1. Check density
+        daily_count = len([e for e in events if e.get("date") == candidate_str])
+        if daily_count >= max_daily_events:
+            continue
+            
+        # 2. Check for slot
+        slot = find_available_slot(events, target_event.get("duration", 60), candidate_str)
+        
+        # Logic: If find_available_slot returns a time, and we haven't exceeded 24h
+        if slot:
+            found_day = candidate_str
+            final_time = slot
+            break
+
+    if not found_day:
+        return state, {"status": "no_available_days_found", "message": f"Could not find a slot within {max_lookahead} days."}
+
+    # Update event
+    original_date = target_event["date"]
+    target_event["date"] = found_day
+    target_event["time"] = final_time
+    target_event["status"] = "moved_to_future_day"
     
     return new_state, {
         "status": "success", 
         "event": event_type, 
-        "original_date": current_date.strftime("%Y-%m-%d"),
-        "new_date": next_day_str,
-        "new_time": new_time
+        "original_date": original_date,
+        "new_date": found_day,
+        "new_time": final_time,
+        "days_shifted": (datetime.strptime(found_day, "%Y-%m-%d") - datetime.strptime(original_date, "%Y-%m-%d")).days
     }
 
 def detect_conflicts(state):
