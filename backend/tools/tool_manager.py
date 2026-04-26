@@ -4,7 +4,7 @@ import os
 # Ensure tools can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from .calendar_tool import reschedule_event
+from .calendar_tool import reschedule_event, find_available_slot
 from .email_tool import send_email
 
 def execute_tool(action_dict, state):
@@ -15,6 +15,7 @@ def execute_tool(action_dict, state):
     current_state = state
     tools_used = []
     primary_response = None
+    events = state.get("events", [])
 
     # 1. Primary Action
     action = action_dict.get("action")
@@ -23,8 +24,10 @@ def execute_tool(action_dict, state):
     
     if action == "reschedule":
         target = action_dict.get("target")
-        # Default +1h shift for testing
-        new_time = action_dict.get("new_time", "21:00") 
+        # Dynamic slot selection
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60})
+        new_time = find_available_slot(events, target_event.get("duration", 60))
+        
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.reschedule")
     elif action == "partial_attend":
@@ -38,8 +41,11 @@ def execute_tool(action_dict, state):
         primary_response = {"status": "success", "message": f"Partial attendance marked for {target}"}
     elif action == "delay_meeting":
         target = action_dict.get("target")
-        # Shift by 30 mins
-        current_state, primary_response = reschedule_event(current_state, target, "11:00") # Dummy shift
+        # Dynamic delay (finding next available slot)
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60})
+        new_time = find_available_slot(events, target_event.get("duration", 60))
+        
+        current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.delay")
     elif action == "skip_event":
         target = action_dict.get("target")

@@ -8,6 +8,44 @@ def get_minutes(time_str):
     except:
         return 0
 
+def format_minutes(minutes):
+    """Helper to convert absolute minutes to HH:MM."""
+    h = (minutes // 60) % 24
+    m = minutes % 60
+    return f"{h:02d}:{m:02d}"
+
+def find_available_slot(events, duration, buffer=15):
+    """
+    Finds the first available gap in the schedule.
+    Logic:
+    - Sort events by time
+    - Check gaps between events
+    - If no gap found, return 30 mins after the last event
+    """
+    if not events:
+        return "09:00" # Default start for empty schedule
+
+    # 1. Prepare and sort events
+    time_slots = []
+    for e in events:
+        start = get_minutes(e["time"])
+        end = start + e.get("duration", 60)
+        time_slots.append((start, end))
+    
+    time_slots.sort()
+
+    # 2. Check gaps
+    # Start checking from the earliest reasonable time (e.g., 08:00)
+    current_time = 480 # 08:00 AM
+    
+    for start, end in time_slots:
+        if start - current_time >= (duration + buffer):
+            return format_minutes(current_time)
+        current_time = max(current_time, end + buffer)
+
+    # 3. No gap found, append after last event
+    return format_minutes(current_time)
+
 def detect_conflicts(state):
     """
     Scans the state for duration-based overlaps.
