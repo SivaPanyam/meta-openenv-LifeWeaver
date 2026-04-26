@@ -102,12 +102,14 @@ class AMALSEnvironment:
         self.step_count = 0
         self.max_steps = 3
         self.start_date = datetime(2026, 4, 26)
+        self.current_time = "08:00"
         self.reset()
 
     def reset(self):
         self.current_state = generate_schedule_conflict()
         self.current_state.current_date = self.start_date.strftime("%Y-%m-%d")
         self.events, self.has_conflict = generate_all_events(self.start_date)
+        self.current_time = "08:00"
         
         prof = [e for e in self.events if e["domain"] == "professional"]
         pers = [e for e in self.events if e["domain"] == "personal"]
@@ -121,11 +123,19 @@ class AMALSEnvironment:
         self.outcome = "pending"
         return self.get_observation()
 
+    def tick(self, minutes=30):
+        """Advances the simulation clock."""
+        h, m = map(int, self.current_time.split(":"))
+        new_dt = datetime(2026, 4, 26, h, m) + timedelta(minutes=minutes)
+        self.current_time = new_dt.strftime("%H:%M")
+        return self.current_time
+
     def get_observation(self):
         if not self.current_state: return {}
         obs = {
             "step": self.step_count,
             "current_date": self.current_state.current_date,
+            "current_time": self.current_time,
             "stress": round(self.current_state.stress, 2),
             "travel_time": self.current_state.travel_time,
             "events": self.events,

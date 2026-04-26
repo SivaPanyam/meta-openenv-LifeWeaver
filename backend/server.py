@@ -13,12 +13,14 @@ try:
     from agents.interaction import run_multi_agent
     from env.environment import AMALSEnvironment
     from tools.tool_manager import execute_tool
+    from tools.calendar_tool import parse_event_times, format_event_time
     from explanation.explainer import generate_explanation
     from memory.memory_store import save_experience
 except ImportError:
     from backend.agents.interaction import run_multi_agent
     from env.environment import AMALSEnvironment
     from backend.tools.tool_manager import execute_tool
+    from backend.tools.calendar_tool import parse_event_times, format_event_time
     from backend.explanation.explainer import generate_explanation
     from backend.memory.memory_store import save_experience
 
@@ -44,8 +46,55 @@ async def reset():
     return {
         "events": obs.get("events", []),
         "current_date": obs.get("current_date"),
+        "current_time": obs.get("current_time"),
         "full_state": obs
     }
+
+@app.post("/tick")
+async def tick(minutes: int = 30):
+    new_time = env.tick(minutes)
+    return {"current_time": new_time}
+
+@app.get("/notifications")
+async def get_notifications():
+    """Checks for events that have ended relative to current_time."""
+    state = env.state()
+    events = state.get("events", [])
+    current_time_str = env.current_time
+    current_date_str = state["internal_truth"].current_date
+    
+    now_dt = datetime.strptime(f"{current_date_str} {current_time_str}", "%Y-%m-%d %H:%M")
+    
+    pending_notifications = []
+    for event in events:
+        if event.get("status") in ["completed", "skipped"]: continue
+        
+        start_dt, end_dt = parse_event_times(event)
+        # If current time is >= end time, and it was previously 'ongoing' or 'rescheduled'
+        if now_dt >= end_dt:
+            pending_notifications.append({
+                "type": "event_completion_check",
+                "event": event["type"],
+                "message": f"Did you finish '{event['type']}'?",
+                "original_end": format_event_time(end_dt)
+            })
+            
+    return {"notifications": pending_notifications}
+
+@app.post("/respond")
+async def respond(event_type: str, response: str):
+    """
+    Handles user interaction:
+    - 'yes': Mark completed.
+    - 'no': Extend duration by 30 mins.
+    """
+    state = env.state()
+    from tools.calendar_tool import handle_event_completion
+    
+    updated_state, msg = handle_event_completion(state, event_type, response)
+    env.events = updated_state["events"] # Persist to environment
+    
+    return {"status": "success", "message": msg, "events": env.events}
 
 @app.post("/optimize")
 async def optimize():

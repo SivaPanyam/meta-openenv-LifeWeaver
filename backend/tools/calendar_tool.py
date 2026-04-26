@@ -165,6 +165,39 @@ def detect_conflicts(state):
                 conflicts.append((events[i]["type"], events[j]["type"]))
     return conflicts
 
+def handle_event_completion(state, event_type, response):
+    """
+    Handles user confirmation for finished events.
+    - 'yes': Marks event as completed.
+    - 'no': Extends duration by 30 mins.
+    """
+    new_state = copy.deepcopy(state)
+    events = new_state.get("events", [])
+    
+    target = next((e for e in events if e["type"] == event_type), None)
+    if not target:
+        return state, f"Event '{event_type}' not found."
+
+    if response.lower() == "yes":
+        target["status"] = "completed"
+        return new_state, f"Event '{event_type}' marked as completed."
+    
+    elif response.lower() == "no":
+        # Extend duration by 30 mins
+        old_dur = target.get("duration", 60)
+        target["duration"] = old_dur + 30
+        target["status"] = "extended"
+        
+        # Check for new conflicts caused by extension
+        conflicts = detect_conflicts(new_state)
+        msg = f"Event '{event_type}' extended to {target['duration']} mins."
+        if conflicts:
+            msg += f" WARNING: Extension created new conflicts: {conflicts}"
+        
+        return new_state, msg
+
+    return state, "Invalid response. Use 'yes' or 'no'."
+
 def reschedule_event(state, event_type, new_time):
     new_state = copy.deepcopy(state)
     for event in new_state.get("events", []):
