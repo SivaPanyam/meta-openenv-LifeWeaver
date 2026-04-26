@@ -24,9 +24,9 @@ def execute_tool(action_dict, state):
     
     if action == "reschedule":
         target = action_dict.get("target")
-        # Dynamic slot selection (date-aware)
-        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26"})
-        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"))
+        # Dynamic slot selection (date-aware + domain-aware)
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"))
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.reschedule")
@@ -46,8 +46,8 @@ def execute_tool(action_dict, state):
     elif action == "delay_meeting":
         target = action_dict.get("target")
         # Dynamic delay (finding next available slot)
-        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26"})
-        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"))
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"))
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.delay")

@@ -15,34 +15,47 @@ def format_minutes(minutes):
     m = minutes % 60
     return f"{h:02d}:{m:02d}"
 
-def find_available_slot(events, duration, date_str, buffer=15):
+def find_available_slot(events, duration, date_str, domain, buffer=15):
     """
-    Finds the first available gap in the schedule for a specific date.
+    Finds the first available gap in the schedule for a specific date and domain.
     """
-    # Filter events by date
-    daily_events = [e for e in events if e.get("date") == date_str]
-    
-    if not daily_events:
-        return "09:00" # Default start for empty schedule
+    # 1. Define Domain Windows (in minutes)
+    if domain == "professional":
+        windows = [(540, 1020)] # 09:00 - 17:00
+    else:
+        windows = [(360, 480), (1080, 1260)] # 06:00-08:00, 18:00-21:00
 
-    # 1. Prepare and sort events
+    # 2. Filter events by date
+    daily_events = [e for e in events if e.get("date") == date_str]
     time_slots = []
     for e in daily_events:
         start = get_minutes(e["time"])
         end = start + e.get("duration", 60)
         time_slots.append((start, end))
-    
     time_slots.sort()
 
-    # 2. Check gaps (start from 08:00 AM)
-    current_time = 480 
-    
-    for start, end in time_slots:
-        if start - current_time >= (duration + buffer):
-            return format_minutes(current_time)
-        current_time = max(current_time, end + buffer)
+    # 3. Search within allowed windows
+    for win_start, win_end in windows:
+        current_ptr = win_start
+        
+        # Check gaps between events that fall within this window
+        for event_start, event_end in time_slots:
+            # Skip events that end before window starts
+            if event_end <= win_start: continue
+            # Stop if event starts after window ends
+            if event_start >= win_end: break
+            
+            # Check gap between current_ptr and next event
+            if event_start - current_ptr >= (duration + buffer):
+                return format_minutes(current_ptr)
+            
+            current_ptr = max(current_ptr, event_end + buffer)
+            
+        # Check remaining space in window after last event
+        if win_end - current_ptr >= duration:
+            return format_minutes(current_ptr)
 
-    return format_minutes(current_time)
+    return None
 
 def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
     """
@@ -69,10 +82,9 @@ def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
         if daily_count >= max_daily_events:
             continue
             
-        # 2. Check for slot
-        slot = find_available_slot(events, target_event.get("duration", 60), candidate_str)
+        # 2. Check for slot (WITH DOMAIN)
+        slot = find_available_slot(events, target_event.get("duration", 60), candidate_str, target_event.get("domain", "personal"))
         
-        # Logic: If find_available_slot returns a time, and we haven't exceeded 24h
         if slot:
             found_day = candidate_str
             final_time = slot
