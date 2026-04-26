@@ -7,7 +7,7 @@ import time
 def validate_phase4():
     print("=== Phase 4 (Explanation Layer) Validation ===\n")
     
-    BASE_URL = "http://127.0.0.1:8000"
+    BASE_URL = "http://127.0.0.1:8002"
     
     # 1. Ensure Backend is Up
     try:

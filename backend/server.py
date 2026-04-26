@@ -69,17 +69,32 @@ async def optimize():
     )
 
     # 5. SAVE EXPERIENCE (Learning Phase)
-    # We summarize the state and store the decision + outcome for future coordination
-    prof_high = any(e for e in initial_state["events"] if e["domain"] == "professional" and e["priority"] == "high")
-    pers_high = any(e for e in initial_state["events"] if e["domain"] == "personal" and e["priority"] == "high")
+    # Extract detailed features for ML training
+    prof_events = [e for e in initial_state["events"] if e["domain"] == "professional"]
+    pers_events = [e for e in initial_state["events"] if e["domain"] == "personal"]
+    
+    prof_high = any(e for e in prof_events if e["priority"] == "high")
+    pers_high = any(e for e in pers_events if e["priority"] == "high")
+    
+    # Feature vector for ML
+    features = {
+        "prof_count": len(prof_events),
+        "pers_count": len(pers_events),
+        "prof_high_prio": 1 if prof_high else 0,
+        "pers_high_prio": 1 if pers_high else 0,
+        "any_inflexible": 1 if any(not e.get("flexible") for e in initial_state["events"]) else 0,
+        "conflict_detected": 1 if initial_state.get("has_conflict") else 0
+    }
+
     state_summary = "double_high_conflict" if (prof_high and pers_high) else "prof_dominant" if prof_high else "pers_dominant" if pers_high else "balanced_conflict"
 
     experience = {
         "state_summary": state_summary,
+        "features": features,
         "decision": final_decision.get("action"),
         "target": final_decision.get("target"),
         "tools": tools_used,
-        "reward": 0.9 if "calendar.reschedule" in tools_used else 0.5, # Simplified reward for learning
+        "reward": 0.9 if "calendar.reschedule" in tools_used else 0.5,
         "timestamp": str(datetime.now())
     }
     save_experience(experience)

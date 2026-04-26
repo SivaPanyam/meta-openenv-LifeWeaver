@@ -1,0 +1,122 @@
+[
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 0,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1,
+      "state_summary": "pers_dominant"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 0,
+      "any_inflexible": 1,
+      "conflict_detected": 1,
+      "state_summary": "prof_dominant"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 0,
+      "pers_high_prio": 1,
+      "any_inflexible": 0,
+      "conflict_detected": 1,
+      "state_summary": "pers_dominant"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 3,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 0,
+      "any_inflexible": 1,
+      "conflict_detected": 0,
+      "state_summary": "prof_dominant"
+    },
+    "output": "reschedule"
+  },
+  {
+    "input": {
+      "prof_count": 3,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1,
+      "state_summary": "double_high_conflict"
+    },
+    "output": "reschedule"
+  }
+]

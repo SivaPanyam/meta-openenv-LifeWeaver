@@ -1,42 +1,218 @@
 [
   {
-    "state_summary": "double_high_conflict",
+    "state_summary": "pers_dominant",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 0,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
     "decision": "reschedule",
-    "target": "doctor_appt",
+    "target": "deep_work",
     "tools": [
       "calendar.reschedule"
     ],
     "reward": 0.9,
-    "timestamp": "2026-04-26 10:17:18.174626"
+    "timestamp": "2026-04-26 10:34:10.356498"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0
+    },
+    "decision": "reschedule",
+    "target": "code_review",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.389866"
   },
   {
     "state_summary": "prof_dominant",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 0,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
     "decision": "reschedule",
-    "target": "presentation",
+    "target": "hobby_time",
     "tools": [
       "calendar.reschedule"
     ],
     "reward": 0.9,
-    "timestamp": "2026-04-26 10:17:22.288649"
+    "timestamp": "2026-04-26 10:34:10.405652"
   },
   {
     "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0
+    },
+    "decision": "reschedule",
+    "target": "team_meeting",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.431721"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
+    "decision": "reschedule",
+    "target": "personal_errand",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.454754"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
+    "decision": "reschedule",
+    "target": "friend_hangout",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.478351"
+  },
+  {
+    "state_summary": "pers_dominant",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 0,
+      "pers_high_prio": 1,
+      "any_inflexible": 0,
+      "conflict_detected": 1
+    },
+    "decision": "reschedule",
+    "target": "family_dinner",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.501953"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 0
+    },
+    "decision": "reschedule",
+    "target": "friend_hangout",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:34:10.522033"
+  },
+  {
+    "state_summary": "prof_dominant",
+    "features": {
+      "prof_count": 3,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 0,
+      "any_inflexible": 1,
+      "conflict_detected": 0
+    },
     "decision": "reschedule",
     "target": "gym",
     "tools": [
       "calendar.reschedule"
     ],
     "reward": 0.9,
-    "timestamp": "2026-04-26 10:17:26.398443"
+    "timestamp": "2026-04-26 10:34:10.547684"
   },
   {
-    "state_summary": "prof_dominant",
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 3,
+      "pers_count": 3,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
     "decision": "reschedule",
-    "target": "gym",
+    "target": "hobby_time",
     "tools": [
       "calendar.reschedule"
     ],
     "reward": 0.9,
-    "timestamp": "2026-04-26 10:17:30.552369"
+    "timestamp": "2026-04-26 10:34:10.573012"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
+    "decision": "reschedule",
+    "target": "deep_work",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:37:37.221097"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "features": {
+      "prof_count": 2,
+      "pers_count": 2,
+      "prof_high_prio": 1,
+      "pers_high_prio": 1,
+      "any_inflexible": 1,
+      "conflict_detected": 1
+    },
+    "decision": "reschedule",
+    "target": "deep_work",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:37:46.945981"
   }
 ]
