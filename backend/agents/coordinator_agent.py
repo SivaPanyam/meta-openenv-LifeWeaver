@@ -43,61 +43,66 @@ def coordinator_agent(state, agent_outputs):
     if not conflicts:
         return {"final_action": {"action": "no_change"}, "reasoning": reasoning}
 
-    # 2. Strategy: Process conflicts one by one
-    # To avoid ping-pong, we try to solve as many as possible in one turn
+    # 2. Strategy: Exhaustively resolve conflicts
     processed_events = set()
-
+    
+    # We loop through the pairs of conflicts directly
     for e1_name, e2_name in conflicts:
-        if e1_name in processed_events or e2_name in processed_events: continue
+        # If this specific collision is already resolved (one or both events moved)
+        if e1_name in processed_events and e2_name in processed_events: continue
         
         e1 = next(e for e in events if e["type"] == e1_name)
         e2 = next(e for e in events if e["type"] == e2_name)
 
-        # A. Rigid Deadlock (Layer 0)
-        if e1.get("priority") == "high" and not e1.get("flexible") and \
-           e2.get("priority") == "high" and not e2.get("flexible"):
+        # Selection: Which event to move?
+        # If one is already processed, we MUST move the other one to solve the remaining overlap
+        if e1_name in processed_events:
+            target_event = e2
+        elif e2_name in processed_events:
+            target_event = e1
+        else:
+            # Both new: Move the more flexible/lower priority one
+            target_event = e2 if (e1.get("priority") == "high" or not e1.get("flexible")) else e1
+
+        target_name = target_event["type"]
+
+        # A. Rigid Deadlock Check (only if both are high-prio/rigid)
+        # If we are forced to move a rigid one because the other is already processed, we escalate
+        other_name = e2_name if target_name == e1_name else e1_name
+        other_event = e2 if target_name == e1_name else e1
+        
+        if target_event.get("priority") == "high" and not target_event.get("flexible") and \
+           other_event.get("priority") == "high" and not other_event.get("flexible"):
             final_actions.append({
                 "action": "escalate_conflict", 
                 "target": f"{e1_name} & {e2_name}", 
-                "description": "User intervention required: Multiple rigid high-priority commitments."
+                "description": "Rigid high-priority deadlock."
             })
             processed_events.update([e1_name, e2_name])
             continue
 
-        # B. Multi-day Move (Layer 1)
+        # B. Resolve via Move or Reschedule
         if stress > 0.7 or len([e for e in events if e.get("date") == today]) > 4:
-            movable = e1 if (e1.get("flexible") or e1.get("priority") == "low") else e2 if (e2.get("flexible") or e2.get("priority") == "low") else None
-            if movable:
+            if target_event.get("flexible") or target_event.get("priority") == "low":
                 final_actions.append({
                     "action": "move_to_next_day", 
-                    "target": movable["type"], 
-                    "description": "Moving to future day due to stress/density."
+                    "target": target_name, 
+                    "description": "Multi-day move for balance."
                 })
-                processed_events.add(movable["type"])
+                processed_events.add(target_name)
                 continue
 
-        # C. Partial Attend or Reschedule (Layer 2)
-        target = e2 if e1.get("priority") == "high" else e1
-        
-        # ML SAFETY: Verify ML recommendation before choosing
-        features = get_ml_features({"events": [target], "has_conflict": True, "stress": stress})
+        # C. Fallback: Reschedule or ML
+        features = get_ml_features({"events": [target_event], "has_conflict": True, "stress": stress})
         ml_action, confidence = predict_ml_action(features)
-        
-        # Only use ML if it's high confidence AND not contradicting rigid constraints
-        if ml_action and confidence > 0.7:
-            # Verify if ML action is feasible (e.g. if move, check for deadlocks)
-            # For simplicity, we flag ML but let tool_manager perform final safety check
-            action = ml_action
-            reasoning.append(f"ML Recommendation ({confidence:.2f}): {ml_action} for {target['type']}")
-        else:
-            action = "reschedule"
+        action = ml_action if (ml_action and confidence > 0.7) else "reschedule"
 
         final_actions.append({
             "action": action,
-            "target": target["type"],
-            "description": f"Resolving overlap via {action}. Fallback logic enabled."
+            "target": target_name,
+            "description": f"Resolving overlap via {action}."
         })
-        processed_events.add(target["type"])
+        processed_events.add(target_name)
 
     # 3. DEADLOCK FALLBACK: Ensure every conflict has a plan
     if not final_actions:

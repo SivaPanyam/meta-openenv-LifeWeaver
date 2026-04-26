@@ -113,6 +113,58 @@ def validate_system():
         print(f"❌ FAIL: Crash during midnight rollover test: {e}")
         results["midnight"] = "FAIL"
 
+    # --- TEST 7: GLOBAL SATURATION ---
+    print("\n[TEST 7: GLOBAL SATURATION]")
+    full_events = []
+    # Fill ALL 7 DAYS with 6 events each
+    for d_offset in range(0, 8):
+        d_str = (datetime.strptime("2026-04-26", "%Y-%m-%d") + timedelta(days=d_offset)).strftime("%Y-%m-%d")
+        for i in range(6):
+            full_events.append({"type": f"task_{d_str}_{i}", "date": d_str, "time": f"{9+i:02d}:00", "duration": 45, "domain": "professional"})
+    
+    full_events.append({"type": "impossible_task", "date": "2026-04-26", "time": "12:00", "duration": 60, "domain": "personal"})
+    
+    # We test the tool manager's fallback via direct call simulation
+    from backend.tools.tool_manager import execute_tool
+    _, tool_resp, tools_used = execute_tool([{"action": "move_to_next_day", "target": "impossible_task"}], {"events": full_events, "travel_time": 15})
+    
+    if "escalate_to_user" in tools_used:
+        print("✅ PASS: System correctly escalated after 7-day saturation.")
+        results["saturation"] = "PASS"
+    else:
+        print(f"❌ FAIL: System did not escalate: {tools_used}")
+        results["saturation"] = "FAIL"
+
+    # --- TEST 8: DOMAIN PARADOX ---
+    print("\n[TEST 8: DOMAIN PARADOX]")
+    # 10 hour professional task (Standard window is only 8h)
+    events = []
+    slot = find_available_slot(events, 600, "2026-04-26", "professional", buffer=15)
+    if slot:
+        print(f"✅ PASS: Found slot for 10h task via Emergency mode: {slot}")
+        results["paradox"] = "PASS"
+    else:
+        print("❌ FAIL: Could not fit 10h task even in Emergency mode.")
+        results["paradox"] = "FAIL"
+
+    # --- TEST 9: MULTI-CONFLICT (A-B-C) ---
+    print("\n[TEST 9: MULTI-CONFLICT]")
+    # A overlaps B, B overlaps C
+    events = [
+        {"type": "A", "date": "2026-04-26", "time": "09:00", "duration": 60, "priority": "high"},
+        {"type": "B", "date": "2026-04-26", "time": "09:30", "duration": 60, "priority": "medium"},
+        {"type": "C", "date": "2026-04-26", "time": "10:00", "duration": 60, "priority": "low"}
+    ]
+    coord_out = coordinator_agent({"events": events, "stress": 0.5, "current_date": "2026-04-26"}, [])
+    actions = coord_out.get("final_actions", [])
+    
+    if len(actions) >= 2:
+        print(f"✅ PASS: Coordinator returned {len(actions)} actions to solve complex chain.")
+        results["multi_conflict"] = "PASS"
+    else:
+        print(f"❌ FAIL: Coordinator only returned {len(actions)} action.")
+        results["multi_conflict"] = "FAIL"
+
     # --- FINAL REPORT ---
     print("\n" + "="*30)
     print("=== SYSTEM VALIDATION REPORT ===")
