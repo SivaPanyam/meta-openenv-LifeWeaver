@@ -1,162 +1,112 @@
 [
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
     "decision": "reschedule",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
+    "decision": "move_to_next_day",
+    "reward": -0.5
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
@@ -166,38 +116,53 @@
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "standard_conflict",
     "decision": "reschedule",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": -0.5
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.4
   },
   {
     "state_summary": "standard_conflict",
@@ -206,53 +171,48 @@
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
+    "decision": "escalate_conflict",
+    "reward": 0.4
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
+    "decision": "move_to_next_day",
+    "reward": 0.4
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": -0.5
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": -0.5
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": -0.5
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
@@ -261,38 +221,33 @@
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": -0.5
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
     "reward": -0.5
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
     "decision": "reschedule",
     "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.4
   },
   {
     "state_summary": "complex_high_conflict",
@@ -306,47 +261,132 @@
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
+    "decision": "escalate_conflict",
+    "reward": -0.5
   },
   {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
+    "decision": "escalate_conflict",
+    "reward": 0.4
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": -0.5
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "escalate_conflict",
+    "reward": -0.5
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": -0.5
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": -0.5
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": -0.5
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "standard_conflict",
     "decision": "reschedule",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": 0.7999999999999999
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": -0.5
+  },
+  {
+    "state_summary": "standard_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.4
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "move_to_next_day",
+    "reward": 0.7999999999999999
+  },
+  {
+    "state_summary": "complex_high_conflict",
+    "decision": "escalate_conflict",
     "reward": 0.4
   },
   {
@@ -356,281 +396,7 @@
   },
   {
     "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
+    "decision": "move_to_next_day",
     "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "complex_high_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.4
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "standard_conflict",
-    "decision": "reschedule",
-    "reward": 0.7999999999999999
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 3,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "family_dinner",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:53:02.386872"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "client_call",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:53:36.097939"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "family_dinner",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:54:34.973319"
-  },
-  {
-    "state_summary": "prof_dominant",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 0,
-      "any_inflexible": 1,
-      "conflict_detected": 0
-    },
-    "decision": "reschedule",
-    "target": "project_sync",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.303990"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 3,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "code_review",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.411433"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "deep_work",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.472544"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 3,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "gym",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.587647"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "deep_work",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.680906"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "family_dinner",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.772242"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 3,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "gym",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.853998"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 3,
-      "pers_count": 2,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "deep_work",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:16.960089"
-  },
-  {
-    "state_summary": "pers_dominant",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 3,
-      "prof_high_prio": 0,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 0
-    },
-    "decision": "reschedule",
-    "target": "personal_errand",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:17.040009"
-  },
-  {
-    "state_summary": "double_high_conflict",
-    "features": {
-      "prof_count": 2,
-      "pers_count": 3,
-      "prof_high_prio": 1,
-      "pers_high_prio": 1,
-      "any_inflexible": 1,
-      "conflict_detected": 1
-    },
-    "decision": "reschedule",
-    "target": "presentation",
-    "tools": [
-      "calendar.reschedule"
-    ],
-    "reward": 0.9,
-    "timestamp": "2026-04-26 10:55:17.115592"
   }
 ]

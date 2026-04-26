@@ -31,8 +31,15 @@ def execute_tool(action_dict, state):
         target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
         new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"), buffer=travel_time)
         
-        current_state, primary_response = reschedule_event(current_state, target, new_time)
-        tools_used.append("calendar.reschedule")
+        if new_time:
+            current_state, primary_response = reschedule_event(current_state, target, new_time)
+            tools_used.append("calendar.reschedule")
+        else:
+            # FALLBACK: If no slot today, move to next available day
+            print(f"No slot today for {target}, falling back to multi-day move.")
+            current_state, primary_response = move_to_next_day(current_state, target, buffer=travel_time)
+            tools_used.append("calendar.move_to_next_day")
+            
     elif action == "move_to_next_day":
         target = action_dict.get("target")
         current_state, primary_response = move_to_next_day(current_state, target, buffer=travel_time)
@@ -47,8 +54,12 @@ def execute_tool(action_dict, state):
         target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
         new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"), buffer=travel_time)
         
-        current_state, primary_response = reschedule_event(current_state, target, new_time)
-        tools_used.append("calendar.delay")
+        if new_time:
+            current_state, primary_response = reschedule_event(current_state, target, new_time)
+            tools_used.append("calendar.delay")
+        else:
+            current_state, primary_response = move_to_next_day(current_state, target, buffer=travel_time)
+            tools_used.append("calendar.move_to_next_day")
     elif action == "skip_event":
         target = action_dict.get("target")
         current_state["events"] = [e for e in current_state.get("events", []) if e["type"] != target]

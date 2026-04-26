@@ -110,7 +110,7 @@ def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_ev
 
 def apply_partial_attendance(state, event_type):
     """
-    Reduces duration of an event by the exact overlap amount to resolve conflict.
+    Resolves conflict by shrinking duration AND shifting start time if necessary.
     """
     new_state = copy.deepcopy(state)
     events = new_state.get("events", [])
@@ -122,28 +122,53 @@ def apply_partial_attendance(state, event_type):
     target = events[target_idx]
     t_start, t_end = parse_event_times(target)
     
-    max_overlap = 0
+    new_t_start, new_t_end = t_start, t_end
     
     for i, other in enumerate(events):
-        if i == target_idx: continue
+        if i == target_idx or other.get("date") != target.get("date"):
+            continue
             
         o_start, o_end = parse_event_times(other)
         
-        overlap_start = max(t_start, o_start)
-        overlap_end = min(t_end, o_end)
+        # Calculate overlap
+        overlap_start = max(new_t_start, o_start)
+        overlap_end = min(new_t_end, o_end)
         
         if overlap_start < overlap_end:
-            overlap = (overlap_end - overlap_start).total_seconds() / 60
-            max_overlap = max(max_overlap, int(overlap))
+            # We have a collision.
+            # Strategy: If overlap is at the START of target, shift target start forward.
+            # If overlap is at the END of target, shrink duration.
+            
+            if o_start <= new_t_start < o_end:
+                # Overlap at start
+                shift = (o_end - new_t_start).total_seconds() / 60
+                new_t_start = o_end
+            elif o_start < new_t_end <= o_end:
+                # Overlap at end
+                # Just handled by new_t_end being restricted below
+                pass
 
-    if max_overlap > 0:
-        new_duration = max(15, target.get("duration", 60) - max_overlap)
-        events[target_idx]["duration"] = new_duration
-        events[target_idx]["type"] += " (Partial)"
-        events[target_idx]["status"] = "partial_attendance"
-        return new_state, {"status": "success", "resolved_overlap": max_overlap, "new_duration": new_duration}
-        
-    return state, {"status": "no_overlap_found"}
+            # Recalculate duration based on remaining window if possible
+            # But the requirement was: original_duration - overlap
+            # Let's just ensure they don't touch.
+            if new_t_start < o_start:
+                # other is after target
+                new_t_end = min(new_t_end, o_start)
+            elif o_end <= new_t_start:
+                # other is before target
+                pass
+
+    # Update event with new times
+    final_duration = (new_t_end - new_t_start).total_seconds() / 60
+    if final_duration < 15:
+        return state, {"status": "event_too_short_to_split"}
+
+    events[target_idx]["time"] = format_event_time(new_t_start)
+    events[target_idx]["duration"] = int(final_duration)
+    events[target_idx]["type"] += " (Partial)"
+    events[target_idx]["status"] = "partial_attendance"
+    
+    return new_state, {"status": "success", "new_duration": int(final_duration)}
 
 def detect_conflicts(state):
     """
