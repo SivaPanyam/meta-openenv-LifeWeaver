@@ -1,60 +1,62 @@
 import copy
 from datetime import datetime, timedelta
 
-def get_minutes(time_str):
-    """Helper to convert HH:MM to absolute minutes."""
-    try:
-        h, m = map(int, time_str.split(":"))
-        return h * 60 + m
-    except:
-        return 0
+def parse_event_times(event):
+    """Helper to get start and end datetime objects for an event."""
+    start_dt = datetime.strptime(f"{event['date']} {event['time']}", "%Y-%m-%d %H:%M")
+    end_dt = start_dt + timedelta(minutes=event.get("duration", 60))
+    return start_dt, end_dt
 
-def format_minutes(minutes):
-    """Helper to convert absolute minutes to HH:MM."""
-    h = (minutes // 60) % 24
-    m = minutes % 60
-    return f"{h:02d}:{m:02d}"
+def format_event_time(dt):
+    """Helper to convert datetime to HH:MM."""
+    return dt.strftime("%H:%M")
 
 def find_available_slot(events, duration, date_str, domain, buffer=15):
     """
     Finds the first available gap in the schedule for a specific date and domain.
     The buffer (travel_time) is respected between all events.
+    Uses datetime for precision and handles cross-day limits.
     """
-    # 1. Define Domain Windows (in minutes)
+    # 1. Define Domain Windows (relative to start of requested date)
+    base_date = datetime.strptime(date_str, "%Y-%m-%d")
+    
     if domain == "professional":
-        windows = [(540, 1020)] # 09:00 - 17:00
+        # 09:00 - 17:00
+        windows = [(base_date.replace(hour=9, minute=0), base_date.replace(hour=17, minute=0))]
     else:
-        windows = [(360, 480), (1080, 1260)] # 06:00-08:00, 18:00-21:00
+        # 06:00-08:00, 18:00-21:00
+        windows = [
+            (base_date.replace(hour=6, minute=0), base_date.replace(hour=8, minute=0)),
+            (base_date.replace(hour=18, minute=0), base_date.replace(hour=21, minute=0))
+        ]
 
-    # 2. Filter events by date
-    daily_events = [e for e in events if e.get("date") == date_str]
-    time_slots = []
-    for e in daily_events:
-        start = get_minutes(e["time"])
-        end = start + e.get("duration", 60)
-        time_slots.append((start, end))
-    time_slots.sort()
+    # 2. Get all events that might conflict (on requested date, or overlapping into it)
+    relevant_events = []
+    for e in events:
+        start, end = parse_event_times(e)
+        # Check if event exists on this date or overlaps into it
+        if start.date() == base_date.date() or end.date() == base_date.date():
+            relevant_events.append((start, end))
+    
+    relevant_events.sort()
 
     # 3. Search within allowed windows
     for win_start, win_end in windows:
         current_ptr = win_start
         
-        # Check gaps between events that fall within this window
-        for event_start, event_end in time_slots:
-            # Skip events that end before window starts
+        for event_start, event_end in relevant_events:
             if event_end <= win_start: continue
-            # Stop if event starts after window ends
             if event_start >= win_end: break
             
-            # Check gap between current_ptr and next event
-            if event_start - current_ptr >= (duration + buffer):
-                return format_minutes(current_ptr)
+            # Check gap
+            if (event_start - current_ptr).total_seconds() / 60 >= (duration + buffer):
+                return format_event_time(current_ptr)
             
-            current_ptr = max(current_ptr, event_end + buffer)
+            current_ptr = max(current_ptr, event_end + timedelta(minutes=buffer))
             
-        # Check remaining space in window after last event
-        if win_end - current_ptr >= duration:
-            return format_minutes(current_ptr)
+        # Check remaining space
+        if (win_end - current_ptr).total_seconds() / 60 >= duration:
+            return format_event_time(current_ptr)
 
     return None
 
@@ -73,17 +75,14 @@ def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_ev
     found_day = None
     final_time = None
 
-    # Search for the first viable day within the next 7 days
     for i in range(1, max_lookahead + 1):
         candidate_date = current_date_obj + timedelta(days=i)
         candidate_str = candidate_date.strftime("%Y-%m-%d")
         
-        # 1. Check density
         daily_count = len([e for e in events if e.get("date") == candidate_str])
         if daily_count >= max_daily_events:
             continue
             
-        # 2. Check for slot (WITH DOMAIN AND BUFFER)
         slot = find_available_slot(events, target_event.get("duration", 60), candidate_str, target_event.get("domain", "personal"), buffer=buffer)
         
         if slot:
@@ -92,7 +91,7 @@ def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_ev
             break
 
     if not found_day:
-        return state, {"status": "no_available_days_found", "message": f"Could not find a slot within {max_lookahead} days."}
+        return state, {"status": "no_available_days_found"}
 
     # Update event
     original_date = target_event["date"]
@@ -121,26 +120,21 @@ def apply_partial_attendance(state, event_type):
         return state, {"status": "event_not_found"}
 
     target = events[target_idx]
-    t_start = get_minutes(target["time"])
-    t_end = t_start + target.get("duration", 60)
+    t_start, t_end = parse_event_times(target)
     
     max_overlap = 0
     
-    # Find the largest overlap with any other event on the same day
     for i, other in enumerate(events):
-        if i == target_idx or other.get("date") != target.get("date"):
-            continue
+        if i == target_idx: continue
             
-        o_start = get_minutes(other["time"])
-        o_end = o_start + other.get("duration", 60)
+        o_start, o_end = parse_event_times(other)
         
-        # Calculate overlap
         overlap_start = max(t_start, o_start)
         overlap_end = min(t_end, o_end)
         
         if overlap_start < overlap_end:
-            overlap = overlap_end - overlap_start
-            max_overlap = max(max_overlap, overlap)
+            overlap = (overlap_end - overlap_start).total_seconds() / 60
+            max_overlap = max(max_overlap, int(overlap))
 
     if max_overlap > 0:
         new_duration = max(15, target.get("duration", 60) - max_overlap)
@@ -153,7 +147,8 @@ def apply_partial_attendance(state, event_type):
 
 def detect_conflicts(state):
     """
-    Scans the state for duration-based overlaps on the same date.
+    Scans the state for duration-based overlaps using datetime precision.
+    Handles cross-day overlaps correctly.
     """
     events = state.get("events", [])
     conflicts = []
@@ -161,15 +156,11 @@ def detect_conflicts(state):
     for i in range(len(events)):
         for j in range(i + 1, len(events)):
             e1, e2 = events[i], events[j]
-            if e1.get("date") != e2.get("date"): continue
             
-            s1 = get_minutes(e1["time"])
-            e1_end = s1 + e1.get("duration", 60)
+            s1, end1 = parse_event_times(e1)
+            s2, end2 = parse_event_times(e2)
             
-            s2 = get_minutes(e2["time"])
-            e2_end = s2 + e2.get("duration", 60)
-            
-            if s1 < e2_end and s2 < e1_end:
+            if s1 < end2 and s2 < end1:
                 conflicts.append((e1["type"], e2["type"]))
                 
     return conflicts
@@ -186,6 +177,12 @@ def reschedule_event(state, event_type, new_time):
         if event["type"] == event_type:
             event["time"] = new_time
             event["status"] = "rescheduled"
+            # Logic for cross-day end_time
+            _, end_dt = parse_event_times(event)
+            original_date = datetime.strptime(event["date"], "%Y-%m-%d")
+            if end_dt.date() > original_date.date():
+                # Note: Currently we keep the start date, but mark as cross-day
+                event["status"] += "_cross_day"
             found = True
             break
             
