@@ -4,7 +4,7 @@ import os
 # Ensure tools can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from .calendar_tool import reschedule_event, find_available_slot, move_to_next_day
+from .calendar_tool import reschedule_event, find_available_slot, move_to_next_day, apply_partial_attendance
 from .email_tool import send_email
 
 def execute_tool(action_dict, state):
@@ -35,14 +35,9 @@ def execute_tool(action_dict, state):
         current_state, primary_response = move_to_next_day(current_state, target)
         tools_used.append("calendar.move_to_next_day")
     elif action == "partial_attend":
-        # Simulate partial attendance by reducing duration
         target = action_dict.get("target")
-        for event in current_state.get("events", []):
-            if event["type"] == target:
-                event["duration"] = event.get("duration", 60) // 2
-                event["type"] += " (Partial)"
+        current_state, primary_response = apply_partial_attendance(current_state, target)
         tools_used.append("calendar.partial_attend")
-        primary_response = {"status": "success", "message": f"Partial attendance marked for {target}"}
     elif action == "delay_meeting":
         target = action_dict.get("target")
         # Dynamic delay (finding next available slot)

@@ -26,15 +26,46 @@ def get_state_summary(events, stress=0.0):
 def coordinator_agent(state, agent_outputs):
     """
     Hybrid coordinator combining:
-    1. ML Prediction (RandomForest)
-    2. Historical Memory (Case-based)
-    3. Multi-day Strategy (move_to_next_day)
-    4. Heuristic Rules (Fallback)
+    1. Rigid Conflict Detection (Escalation)
+    2. ML Prediction (RandomForest)
+    3. Historical Memory (Case-based)
+    4. Multi-day Strategy (move_to_next_day)
+    5. Heuristic Rules (Fallback)
     """
     events = state.get("events", [])
     stress = state.get("stress", 0.0)
     reasoning = [o["reason"] for o in agent_outputs if "reason" in o]
     
+    # --- LAYER 0: RIGID CONFLICT DETECTION ---
+    # Check if there's a conflict where both are high-prio and non-flexible
+    conflicts = []
+    # Simplified conflict scan for coordination logic
+    for i in range(len(events)):
+        for j in range(i + 1, len(events)):
+            e1, e2 = events[i], events[j]
+            if e1.get("date") != e2.get("date"): continue
+            
+            s1 = get_ml_features({"events": [e1]}).get("prof_count", 0) # Dummy use of features
+            # Re-implementing overlap check here for coordination context
+            start1 = sum(x * int(t) for x, t in zip([60, 1], e1["time"].split(":")))
+            end1 = start1 + e1.get("duration", 60)
+            start2 = sum(x * int(t) for x, t in zip([60, 1], e2["time"].split(":")))
+            end2 = start2 + e2.get("duration", 60)
+
+            if start1 < end2 and start2 < end1:
+                if e1.get("priority") == "high" and not e1.get("flexible") and \
+                   e2.get("priority") == "high" and not e2.get("flexible"):
+                    reason = f"Rigid conflict detected between '{e1['type']}' and '{e2['type']}'. Both are high priority and inflexible."
+                    reasoning.append(reason)
+                    return {
+                        "final_action": {
+                            "action": "escalate_conflict", 
+                            "target": "user", 
+                            "description": "User intervention required: Cannot automatically resolve overlapping high-priority rigid commitments."
+                        },
+                        "reasoning": reasoning
+                    }
+
     # 0. Multi-day Strategy: Move to next day if stressed or schedule too dense
     today = state.get("current_date")
     today_events = [e for e in events if e.get("date") == today]

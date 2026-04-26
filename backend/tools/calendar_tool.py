@@ -108,6 +108,48 @@ def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
         "days_shifted": (datetime.strptime(found_day, "%Y-%m-%d") - datetime.strptime(original_date, "%Y-%m-%d")).days
     }
 
+def apply_partial_attendance(state, event_type):
+    """
+    Reduces duration of an event by the exact overlap amount to resolve conflict.
+    """
+    new_state = copy.deepcopy(state)
+    events = new_state.get("events", [])
+    
+    target_idx = next((i for i, e in enumerate(events) if e["type"] == event_type), None)
+    if target_idx is None:
+        return state, {"status": "event_not_found"}
+
+    target = events[target_idx]
+    t_start = get_minutes(target["time"])
+    t_end = t_start + target.get("duration", 60)
+    
+    max_overlap = 0
+    
+    # Find the largest overlap with any other event on the same day
+    for i, other in enumerate(events):
+        if i == target_idx or other.get("date") != target.get("date"):
+            continue
+            
+        o_start = get_minutes(other["time"])
+        o_end = o_start + other.get("duration", 60)
+        
+        # Calculate overlap
+        overlap_start = max(t_start, o_start)
+        overlap_end = min(t_end, o_end)
+        
+        if overlap_start < overlap_end:
+            overlap = overlap_end - overlap_start
+            max_overlap = max(max_overlap, overlap)
+
+    if max_overlap > 0:
+        new_duration = max(15, target.get("duration", 60) - max_overlap)
+        events[target_idx]["duration"] = new_duration
+        events[target_idx]["type"] += " (Partial)"
+        events[target_idx]["status"] = "partial_attendance"
+        return new_state, {"status": "success", "resolved_overlap": max_overlap, "new_duration": new_duration}
+        
+    return state, {"status": "no_overlap_found"}
+
 def detect_conflicts(state):
     """
     Scans the state for duration-based overlaps on the same date.
