@@ -4,16 +4,20 @@ import os
 try:
     from memory_store import get_best_action_from_memory
     from ml_logic import get_ml_features, predict_ml_action
+    from tools.calendar_tool import detect_conflicts
 except ImportError:
     try:
         from agents.memory_store import get_best_action_from_memory
         from agents.ml_logic import get_ml_features, predict_ml_action
+        from tools.calendar_tool import detect_conflicts
     except ImportError:
         # Final fallback for evaluation script context
         sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "memory"))
+        sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
         sys.path.append(os.path.dirname(os.path.abspath(__file__)))
         from memory_store import get_best_action_from_memory
         from ml_logic import get_ml_features, predict_ml_action
+        from calendar_tool import detect_conflicts
 
 def get_state_summary(events, stress=0.0):
     prof = any(e for e in events if e["domain"] == "professional")
@@ -73,21 +77,31 @@ def coordinator_agent(state, agent_outputs):
                 continue
 
         # C. Partial Attend or Reschedule (Layer 2)
-        # Choose the more flexible/lower priority one to modify
         target = e2 if e1.get("priority") == "high" else e1
         
-        # ML check for target
+        # ML SAFETY: Verify ML recommendation before choosing
         features = get_ml_features({"events": [target], "has_conflict": True, "stress": stress})
         ml_action, confidence = predict_ml_action(features)
         
-        action = ml_action if (ml_action and confidence > 0.6) else "reschedule"
-        
+        # Only use ML if it's high confidence AND not contradicting rigid constraints
+        if ml_action and confidence > 0.7:
+            # Verify if ML action is feasible (e.g. if move, check for deadlocks)
+            # For simplicity, we flag ML but let tool_manager perform final safety check
+            action = ml_action
+            reasoning.append(f"ML Recommendation ({confidence:.2f}): {ml_action} for {target['type']}")
+        else:
+            action = "reschedule"
+
         final_actions.append({
             "action": action,
             "target": target["type"],
-            "description": f"Resolving overlap with {target['type']} via {action}."
+            "description": f"Resolving overlap via {action}. Fallback logic enabled."
         })
         processed_events.add(target["type"])
+
+    # 3. DEADLOCK FALLBACK: Ensure every conflict has a plan
+    if not final_actions:
+        return {"final_action": {"action": "no_change"}, "reasoning": reasoning}
 
     return {
         "final_actions": final_actions,

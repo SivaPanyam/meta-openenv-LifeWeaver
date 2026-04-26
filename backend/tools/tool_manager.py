@@ -54,8 +54,15 @@ def execute_tool(decision_input, state):
                 
         elif action == "move_to_next_day":
             current_state, resp = move_to_next_day(current_state, target, buffer=travel_time)
-            tools_used.append("calendar.move_to_next_day")
-            if not primary_response: primary_response = resp
+            
+            # Level-2 Fallback: If 7-day lookahead fails, escalate
+            if resp.get("status") == "no_available_days_found":
+                print(f"Saturation detected for {target}. Escalating.")
+                tools_used.append("escalate_to_user")
+                primary_response = {"status": "escalated", "message": f"Could not find a slot for {target} within 7 days. User intervention required."}
+            else:
+                tools_used.append("calendar.move_to_next_day")
+                if not primary_response: primary_response = resp
 
         elif action == "partial_attend":
             current_state, resp = apply_partial_attendance(current_state, target)

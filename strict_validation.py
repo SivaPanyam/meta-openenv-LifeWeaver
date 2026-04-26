@@ -61,11 +61,13 @@ def validate_system():
         {"type": "Rigid 2", "date": "2026-04-26", "time": "10:00", "duration": 60, "priority": "high", "flexible": False}
     ]
     coord_out = coordinator_agent({"events": events, "stress": 0.5, "current_date": "2026-04-26"}, [])
-    if coord_out["final_action"]["action"] == "escalate_conflict":
+    actions = coord_out.get("final_actions", [coord_out.get("final_action", {})])
+    
+    if any(a.get("action") == "escalate_conflict" for a in actions):
         print("✅ PASS: Deadlock correctly escalated to user.")
         results["deadlock"] = "PASS"
     else:
-        print(f"❌ FAIL: System attempted automated fix: {coord_out['final_action']['action']}")
+        print(f"❌ FAIL: System attempted automated fix instead of escalation.")
         results["deadlock"] = "FAIL"
 
     # --- TEST 4: PARTIAL ATTEND ---
