@@ -46,7 +46,8 @@ def run_multi_agent(state: dict) -> dict:
         
         return {
             "agent_outputs": agent_outputs,
-            "final_action": final_result["final_action"],
+            "final_action": final_result.get("final_action", {}),
+            "final_actions": final_result.get("final_actions", []),
             "reasoning": final_result["reasoning"]
         }
         
@@ -54,5 +55,6 @@ def run_multi_agent(state: dict) -> dict:
         return {
             "agent_outputs": [],
             "final_action": {"action": "no_change"},
+            "final_actions": [],
             "reasoning": [f"Error in multi-agent engine: {str(e)}"]
         }

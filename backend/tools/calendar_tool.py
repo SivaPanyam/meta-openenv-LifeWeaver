@@ -11,33 +11,34 @@ def format_event_time(dt):
     """Helper to convert datetime to HH:MM."""
     return dt.strftime("%H:%M")
 
-def find_available_slot(events, duration, date_str, domain, buffer=15):
+def find_available_slot(events, duration, date_str, domain, buffer=15, crunch_mode=False):
     """
     Finds the first available gap in the schedule for a specific date and domain.
-    The buffer (travel_time) is respected between all events.
-    Uses datetime for precision and handles cross-day limits.
+    - Cross-Day Buffer: Considers ALL events to prevent midnight 'leaks'.
+    - Crunch Mode: Expands windows if no slot is found in standard hours.
     """
-    # 1. Define Domain Windows (relative to start of requested date)
     base_date = datetime.strptime(date_str, "%Y-%m-%d")
     
+    # 1. Define Windows (Standard vs Crunch)
     if domain == "professional":
-        # 09:00 - 17:00
-        windows = [(base_date.replace(hour=9, minute=0), base_date.replace(hour=17, minute=0))]
+        if crunch_mode:
+            windows = [(base_date.replace(hour=8, minute=0), base_date.replace(hour=20, minute=0))]
+        else:
+            windows = [(base_date.replace(hour=9, minute=0), base_date.replace(hour=17, minute=0))]
     else:
-        # 06:00-08:00, 18:00-21:00
-        windows = [
-            (base_date.replace(hour=6, minute=0), base_date.replace(hour=8, minute=0)),
-            (base_date.replace(hour=18, minute=0), base_date.replace(hour=21, minute=0))
-        ]
+        if crunch_mode:
+            windows = [(base_date.replace(hour=5, minute=0), base_date.replace(hour=23, minute=0))]
+        else:
+            windows = [
+                (base_date.replace(hour=6, minute=0), base_date.replace(hour=8, minute=0)),
+                (base_date.replace(hour=18, minute=0), base_date.replace(hour=21, minute=0))
+            ]
 
-    # 2. Get all events that might conflict (on requested date, or overlapping into it)
+    # 2. Collect ALL relevant events (sorted by start time)
+    # Including events from other days that might overlap with our windows due to buffer
     relevant_events = []
     for e in events:
-        start, end = parse_event_times(e)
-        # Check if event exists on this date or overlaps into it
-        if start.date() == base_date.date() or end.date() == base_date.date():
-            relevant_events.append((start, end))
-    
+        relevant_events.append(parse_event_times(e))
     relevant_events.sort()
 
     # 3. Search within allowed windows
@@ -45,33 +46,44 @@ def find_available_slot(events, duration, date_str, domain, buffer=15):
         current_ptr = win_start
         
         for event_start, event_end in relevant_events:
-            if event_end <= win_start: continue
-            if event_start >= win_end: break
+            # Buffer must exist BEFORE and AFTER every event
+            eff_event_start = event_start - timedelta(minutes=buffer)
+            eff_event_end = event_end + timedelta(minutes=buffer)
+
+            if eff_event_end <= win_start: continue
+            if eff_event_start >= win_end: break
             
-            # Check gap
-            if (event_start - current_ptr).total_seconds() / 60 >= (duration + buffer):
+            # Check gap between current_ptr and the START of the next event's influence
+            if (eff_event_start - current_ptr).total_seconds() / 60 >= duration:
                 return format_event_time(current_ptr)
             
-            current_ptr = max(current_ptr, event_end + timedelta(minutes=buffer))
+            current_ptr = max(current_ptr, eff_event_end)
             
-        # Check remaining space
+        # Check remaining space after last event in window
         if (win_end - current_ptr).total_seconds() / 60 >= duration:
             return format_event_time(current_ptr)
+
+    # Fallback: Try Crunch Mode if not already in it
+    if not crunch_mode:
+        return find_available_slot(events, duration, date_str, domain, buffer, crunch_mode=True)
 
     return None
 
 def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_events=6):
     """
-    Moves an event to the FIRST available day that isn't overcrowded.
+    Moves an event to the FIRST available day that isn't overcrowded 
+    AND doesn't create a Rigid Deadlock (Future-Peeking).
     """
     new_state = copy.deepcopy(state)
     events = new_state.get("events", [])
     
-    target_event = next((e for e in events if e["type"] == event_type), None)
-    if not target_event:
+    target_idx = next((i for i, e in enumerate(events) if e["type"] == event_type), None)
+    if target_idx is None:
         return state, {"status": "event_not_found"}
-
+    
+    target_event = events[target_idx]
     current_date_obj = datetime.strptime(target_event["date"], "%Y-%m-%d")
+    
     found_day = None
     final_time = None
 
@@ -86,9 +98,30 @@ def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_ev
         slot = find_available_slot(events, target_event.get("duration", 60), candidate_str, target_event.get("domain", "personal"), buffer=buffer)
         
         if slot:
-            found_day = candidate_str
-            final_time = slot
-            break
+            # --- FUTURE PEEKING ---
+            # Simulate the move and check for rigid deadlocks
+            temp_events = copy.deepcopy(events)
+            temp_events[target_idx]["date"] = candidate_str
+            temp_events[target_idx]["time"] = slot
+            
+            # Check for rigid conflicts on the candidate day
+            rigid_deadlock = False
+            for j in range(len(temp_events)):
+                if j == target_idx or temp_events[j]["date"] != candidate_str: continue
+                
+                s1, e1 = parse_event_times(temp_events[target_idx])
+                s2, e2 = parse_event_times(temp_events[j])
+                
+                if s1 < e2 and s2 < e1:
+                    if temp_events[target_idx].get("priority") == "high" and not temp_events[target_idx].get("flexible") and \
+                       temp_events[j].get("priority") == "high" and not temp_events[j].get("flexible"):
+                        rigid_deadlock = True
+                        break
+            
+            if not rigid_deadlock:
+                found_day = candidate_str
+                final_time = slot
+                break
 
     if not found_day:
         return state, {"status": "no_available_days_found"}

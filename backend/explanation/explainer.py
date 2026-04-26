@@ -20,9 +20,10 @@ def find_conflicting_events(events):
                 conflicts.extend([e1["type"], e2["type"]])
     return list(set(conflicts))
 
-def generate_explanation(old_state, agent_outputs, final_action, tools_used, new_state):
+def generate_explanation(old_state, agent_outputs, final_actions, tools_used, new_state):
     """
     Constructs a structured explanation of the entire decision lifecycle.
+    Supports multi-action decisions.
     """
     old_events = old_state.get("events", [])
     new_events = new_state.get("events", [])
@@ -41,7 +42,7 @@ def generate_explanation(old_state, agent_outputs, final_action, tools_used, new
         
         "agent_opinions": opinions,
         
-        "final_decision": final_action,
+        "final_decision": final_actions,
         
         "action_taken": tools_used,
         

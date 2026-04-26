@@ -55,21 +55,29 @@ async def optimize():
     # 2. Run Multi-Agent Analysis
     agent_result = run_multi_agent(initial_state)
     agent_outputs = agent_result.get("agent_outputs", [])
-    final_decision = agent_result.get("final_action", {})
+    
+    # Support Recursive Resolution (List of Actions)
+    final_actions = agent_result.get("final_actions", [])
+    if not final_actions:
+        final_actions = [agent_result.get("final_action", {})]
     
     # 3. Execute Decision via Tool Manager
-    updated_state, tool_resp, tools_used = execute_tool(final_decision, initial_state)
+    updated_state, tool_resp, tools_used = execute_tool(final_actions, initial_state)
     
     # 4. Generate Structured Explanation
     explanation = generate_explanation(
         old_state=initial_state,
         agent_outputs=agent_outputs,
-        final_action=final_decision,
+        final_actions=final_actions,
         tools_used=tools_used,
         new_state=updated_state
     )
 
     # 5. SAVE EXPERIENCE (Learning Phase)
+    # Using the first action for simple memory storage (legacy)
+    primary_decision = final_actions[0].get("action") if final_actions else "no_change"
+    primary_target = final_actions[0].get("target") if final_actions else None
+    
     # Extract detailed features for ML training
     prof_events = [e for e in initial_state["events"] if e["domain"] == "professional"]
     pers_events = [e for e in initial_state["events"] if e["domain"] == "personal"]
@@ -92,8 +100,8 @@ async def optimize():
     experience = {
         "state_summary": state_summary,
         "features": features,
-        "decision": final_decision.get("action"),
-        "target": final_decision.get("target"),
+        "decision": primary_decision,
+        "target": primary_target,
         "tools": tools_used,
         "reward": 0.9 if "calendar.reschedule" in tools_used else 0.5,
         "timestamp": str(datetime.now())
