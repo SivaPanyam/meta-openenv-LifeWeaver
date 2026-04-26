@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, RefreshCw, Zap, Clock, User, Briefcase } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Calendar as CalendarIcon, RefreshCw, Zap, Clock, User, Briefcase, FastForward } from 'lucide-react';
 import CalendarView from '../components/CalendarView';
 import ReasoningPanel from '../components/ReasoningPanel';
-import { fetchReset, optimize } from '../services/api';
+import { NotificationPopup } from '../components/NotificationPopup';
+import { fetchReset, optimize, fetchNotifications, respondToEvent, tickTime } from '../services/api';
 
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
@@ -10,13 +11,19 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [optimizing, setOptimizing] = useState(false);
   const [viewMode, setViewMode] = useState('before'); // 'before' or 'after'
+  const [currentTime, setCurrentTime] = useState("08:00");
+  const [activeNotification, setActiveNotification] = useState(null);
+  
+  const pollingRef = useRef(null);
 
   const handleReset = async () => {
     setLoading(true);
     const data = await fetchReset();
     setEvents(data.events || []);
+    setCurrentTime(data.current_time || "08:00");
     setExplanation(null);
     setViewMode('before');
+    setActiveNotification(null);
     setLoading(false);
   };
 
@@ -31,8 +38,49 @@ const Dashboard = () => {
     setOptimizing(false);
   };
 
+  const handleTick = async () => {
+    const data = await tickTime(30);
+    if (data) {
+      setCurrentTime(data.current_time);
+      checkNotifications();
+    }
+  };
+
+  const checkNotifications = async () => {
+    const data = await fetchNotifications();
+    if (data.notifications && data.notifications.length > 0) {
+      // Pick the first one for now
+      setActiveNotification({
+        message: data.notifications[0].message,
+        event: data.notifications[0].event
+      });
+    } else {
+      setActiveNotification(null);
+    }
+  };
+
+  const handleComplete = async (eventName) => {
+    const data = await respondToEvent(eventName, 'yes');
+    if (data) {
+      setEvents(data.events);
+      setActiveNotification(null);
+    }
+  };
+
+  const handleExtend = async (eventName) => {
+    const data = await respondToEvent(eventName, 'no');
+    if (data) {
+      setEvents(data.events);
+      setActiveNotification(null);
+    }
+  };
+
   useEffect(() => {
     handleReset();
+    
+    // Setup Polling
+    pollingRef.current = setInterval(checkNotifications, 10000);
+    return () => clearInterval(pollingRef.current);
   }, []);
 
   const today = new Date();
@@ -40,6 +88,13 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen w-screen bg-white overflow-hidden text-gray-900 font-sans">
       
+      {/* Real-time Notifications */}
+      <NotificationPopup 
+        notification={activeNotification}
+        onComplete={handleComplete}
+        onExtend={handleExtend}
+      />
+
       {/* --- Sidebar (Left) --- */}
       <aside className="w-80 border-r flex flex-col p-8 bg-gray-50 flex-shrink-0 overflow-y-auto">
         <div className="flex items-center gap-3 mb-10">
@@ -51,7 +106,12 @@ const Dashboard = () => {
 
         <div className="mb-10">
           <h2 className="text-xl font-bold">{today.strftime ? today.strftime("%A") : today.toLocaleDateString('en-US', { weekday: 'long' })}</h2>
-          <p className="text-gray-400 font-medium">{today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-gray-400 font-medium text-sm">{today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter flex items-center gap-1">
+              <Clock size={10} /> {currentTime}
+            </span>
+          </div>
         </div>
 
         <div className="space-y-3 mb-auto">
@@ -71,6 +131,14 @@ const Dashboard = () => {
           >
             <Zap size={18} fill="currentColor" />
             Optimize
+          </button>
+
+          <button 
+            onClick={handleTick}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all font-bold"
+          >
+            <FastForward size={18} />
+            Advance 30m
           </button>
         </div>
 
