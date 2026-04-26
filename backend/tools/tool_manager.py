@@ -16,6 +16,9 @@ def execute_tool(action_dict, state):
     tools_used = []
     primary_response = None
     events = state.get("events", [])
+    
+    # Realistic scheduling: Use travel_time as buffer
+    travel_time = state.get("travel_time", 15)
 
     # 1. Primary Action
     action = action_dict.get("action")
@@ -24,15 +27,15 @@ def execute_tool(action_dict, state):
     
     if action == "reschedule":
         target = action_dict.get("target")
-        # Dynamic slot selection (date-aware + domain-aware)
+        # Dynamic slot selection (date-aware + domain-aware + buffer-aware)
         target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
-        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"))
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"), buffer=travel_time)
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.reschedule")
     elif action == "move_to_next_day":
         target = action_dict.get("target")
-        current_state, primary_response = move_to_next_day(current_state, target)
+        current_state, primary_response = move_to_next_day(current_state, target, buffer=travel_time)
         tools_used.append("calendar.move_to_next_day")
     elif action == "partial_attend":
         target = action_dict.get("target")
@@ -42,7 +45,7 @@ def execute_tool(action_dict, state):
         target = action_dict.get("target")
         # Dynamic delay (finding next available slot)
         target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26", "domain": "personal"})
-        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"))
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"), target_event.get("domain", "personal"), buffer=travel_time)
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.delay")

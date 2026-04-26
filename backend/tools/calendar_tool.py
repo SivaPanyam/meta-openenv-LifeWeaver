@@ -18,6 +18,7 @@ def format_minutes(minutes):
 def find_available_slot(events, duration, date_str, domain, buffer=15):
     """
     Finds the first available gap in the schedule for a specific date and domain.
+    The buffer (travel_time) is respected between all events.
     """
     # 1. Define Domain Windows (in minutes)
     if domain == "professional":
@@ -57,7 +58,7 @@ def find_available_slot(events, duration, date_str, domain, buffer=15):
 
     return None
 
-def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
+def move_to_next_day(state, event_type, buffer=15, max_lookahead=7, max_daily_events=6):
     """
     Moves an event to the FIRST available day that isn't overcrowded.
     """
@@ -82,8 +83,8 @@ def move_to_next_day(state, event_type, max_lookahead=7, max_daily_events=6):
         if daily_count >= max_daily_events:
             continue
             
-        # 2. Check for slot (WITH DOMAIN)
-        slot = find_available_slot(events, target_event.get("duration", 60), candidate_str, target_event.get("domain", "personal"))
+        # 2. Check for slot (WITH DOMAIN AND BUFFER)
+        slot = find_available_slot(events, target_event.get("duration", 60), candidate_str, target_event.get("domain", "personal"), buffer=buffer)
         
         if slot:
             found_day = candidate_str
