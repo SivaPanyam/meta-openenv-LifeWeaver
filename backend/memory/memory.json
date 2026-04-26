@@ -1,0 +1,42 @@
+[
+  {
+    "state_summary": "double_high_conflict",
+    "decision": "reschedule",
+    "target": "doctor_appt",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:17:18.174626"
+  },
+  {
+    "state_summary": "prof_dominant",
+    "decision": "reschedule",
+    "target": "presentation",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:17:22.288649"
+  },
+  {
+    "state_summary": "double_high_conflict",
+    "decision": "reschedule",
+    "target": "gym",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:17:26.398443"
+  },
+  {
+    "state_summary": "prof_dominant",
+    "decision": "reschedule",
+    "target": "gym",
+    "tools": [
+      "calendar.reschedule"
+    ],
+    "reward": 0.9,
+    "timestamp": "2026-04-26 10:17:30.552369"
+  }
+]

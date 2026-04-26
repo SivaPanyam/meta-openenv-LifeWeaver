@@ -1,0 +1,15 @@
+{
+  "baseline": {
+    "avg_reward": 0.54,
+    "success_rate": 98.0,
+    "resolution_rate": 97.61904761904762,
+    "best_strategy": "reschedule"
+  },
+  "learned": {
+    "avg_reward": 0.516,
+    "success_rate": 92.0,
+    "resolution_rate": 90.47619047619048,
+    "best_strategy": "reschedule"
+  },
+  "improvement": -4.444444444444448
+}
