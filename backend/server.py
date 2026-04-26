@@ -43,6 +43,7 @@ async def reset():
     obs = env.reset()
     return {
         "events": obs.get("events", []),
+        "current_date": obs.get("current_date"),
         "full_state": obs
     }
 

@@ -7,6 +7,7 @@ def generate_schedule_conflict():
     
     return WorldState(
         time="evening",
+        current_date="2026-04-26",
         meeting=True,
         family_dinner=True,
         # Dynamic context

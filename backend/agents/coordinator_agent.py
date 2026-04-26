@@ -15,10 +15,11 @@ except ImportError:
         from memory_store import get_best_action_from_memory
         from ml_logic import get_ml_features, predict_ml_action
 
-def get_state_summary(events):
+def get_state_summary(events, stress=0.0):
     prof = any(e for e in events if e["domain"] == "professional")
     pers = any(e for e in events if e["domain"] == "personal")
     
+    if stress > 0.7: return "high_stress_state"
     if prof and pers: return "double_high_conflict"
     return "standard_conflict"
 
@@ -27,11 +28,32 @@ def coordinator_agent(state, agent_outputs):
     Hybrid coordinator combining:
     1. ML Prediction (RandomForest)
     2. Historical Memory (Case-based)
-    3. Heuristic Rules (Fallback)
+    3. Multi-day Strategy (move_to_next_day)
+    4. Heuristic Rules (Fallback)
     """
     events = state.get("events", [])
+    stress = state.get("stress", 0.0)
     reasoning = [o["reason"] for o in agent_outputs if "reason" in o]
     
+    # 0. Multi-day Strategy: Move to next day if stressed or schedule too dense
+    today = state.get("current_date")
+    today_events = [e for e in events if e.get("date") == today]
+    
+    if stress > 0.7 or len(today_events) > 4:
+        # Pick a flexible or low-priority event to move
+        movable = next((e for e in today_events if e.get("flexible") or e.get("priority") == "low"), None)
+        if movable:
+            reason = "High stress or dense schedule detected. Moving non-critical task to tomorrow for better balance."
+            reasoning.append(reason)
+            return {
+                "final_action": {
+                    "action": "move_to_next_day", 
+                    "target": movable["type"], 
+                    "description": reason
+                },
+                "reasoning": reasoning
+            }
+
     # --- HYBRID LAYER 1: ML PREDICTION ---
     features = get_ml_features(state)
     ml_action, confidence = predict_ml_action(features)
@@ -48,7 +70,7 @@ def coordinator_agent(state, agent_outputs):
         }
 
     # --- HYBRID LAYER 2: HISTORICAL MEMORY ---
-    summary = get_state_summary(events)
+    summary = get_state_summary(events, stress)
     best_past_action = get_best_action_from_memory(summary)
     
     if best_past_action and best_past_action != "no_change":

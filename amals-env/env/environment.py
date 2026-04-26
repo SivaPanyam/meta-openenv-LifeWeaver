@@ -1,5 +1,6 @@
 import random
 import copy
+from datetime import datetime, timedelta
 from .scenarios import generate_schedule_conflict
 from .reward import calculate_reward
 from mcp_local.calendar_server import CalendarServer
@@ -24,11 +25,12 @@ PERSONAL_POOL = [
     {"type": "doctor_appt", "priority": "high", "flexible": False}
 ]
 
-def generate_domain_events(domain_type, count):
+def generate_domain_events(domain_type, count, base_date):
     pool = PROFESSIONAL_POOL if domain_type == "professional" else PERSONAL_POOL
     selected = [copy.deepcopy(e) for e in random.sample(pool, k=min(count, len(pool)))]
     for e in selected:
         e["domain"] = domain_type
+        e["date"] = base_date.strftime("%Y-%m-%d")
         e["source"] = random.choice(["email", "calendar"]) if domain_type == "professional" else random.choice(["conversation", "manual"])
     return selected
 
@@ -48,10 +50,10 @@ def get_minutes(time_str):
     h, m = map(int, time_str.split(":"))
     return h * 60 + m
 
-def generate_all_events():
-    """Enhanced generation with complex conflicts."""
-    events = generate_domain_events("professional", random.randint(2, 3))
-    events += generate_domain_events("personal", random.randint(2, 3))
+def generate_all_events(base_date):
+    """Enhanced generation with complex conflicts and dates."""
+    events = generate_domain_events("professional", random.randint(2, 3), base_date)
+    events += generate_domain_events("personal", random.randint(2, 3), base_date)
     
     random.shuffle(events)
     assign_realistic_time(events)
@@ -79,9 +81,10 @@ def generate_all_events():
                 events[idx2]["priority"] = "high"
                 has_conflict = True
 
-    # Secondary Scan for natural conflicts
+    # Secondary Scan for natural conflicts (only same date)
     for i in range(len(events)):
         for j in range(i + 1, len(events)):
+            if events[i]["date"] != events[j]["date"]: continue
             s1 = get_minutes(events[i]["time"])
             e1_end = s1 + events[i].get("duration", 60)
             s2 = get_minutes(events[j]["time"])
@@ -98,11 +101,13 @@ class AMALSEnvironment:
         self.calendar = CalendarServer()
         self.step_count = 0
         self.max_steps = 3
+        self.start_date = datetime(2026, 4, 26)
         self.reset()
 
     def reset(self):
         self.current_state = generate_schedule_conflict()
-        self.events, self.has_conflict = generate_all_events()
+        self.current_state.current_date = self.start_date.strftime("%Y-%m-%d")
+        self.events, self.has_conflict = generate_all_events(self.start_date)
         
         prof = [e for e in self.events if e["domain"] == "professional"]
         pers = [e for e in self.events if e["domain"] == "personal"]
@@ -120,6 +125,7 @@ class AMALSEnvironment:
         if not self.current_state: return {}
         obs = {
             "step": self.step_count,
+            "current_date": self.current_state.current_date,
             "stress": round(self.current_state.stress, 2),
             "travel_time": self.current_state.travel_time,
             "events": self.events,
@@ -138,13 +144,22 @@ class AMALSEnvironment:
         reward = 0
         
         # New: Action Costs
-        costs = {"reschedule": -0.1, "send_email": -0.05, "skip_event": -0.4, "delay_meeting": -0.2, "partial_attend": -0.15}
+        costs = {
+            "reschedule": -0.1, 
+            "send_email": -0.05, 
+            "skip_event": -0.4, 
+            "delay_meeting": -0.2, 
+            "partial_attend": -0.15,
+            "move_to_next_day": -0.25
+        }
         reward += costs.get(decision, 0)
         secondary = action.get("secondary_action")
         reward += costs.get(secondary, 0)
 
         if self.step_count == 0:
             self.last_decision = decision
+            if decision == "move_to_next_day":
+                reward += 0.1 # strategic move bonus
             reward += 0.2
         elif self.step_count == 1:
             # Execution phase

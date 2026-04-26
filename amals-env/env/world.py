@@ -3,6 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class WorldState:
     time: str
+    current_date: str
     meeting: bool
     family_dinner: bool
     budget: int

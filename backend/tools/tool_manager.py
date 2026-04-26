@@ -4,7 +4,7 @@ import os
 # Ensure tools can be imported
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from .calendar_tool import reschedule_event, find_available_slot
+from .calendar_tool import reschedule_event, find_available_slot, move_to_next_day
 from .email_tool import send_email
 
 def execute_tool(action_dict, state):
@@ -24,12 +24,16 @@ def execute_tool(action_dict, state):
     
     if action == "reschedule":
         target = action_dict.get("target")
-        # Dynamic slot selection
-        target_event = next((e for e in events if e["type"] == target), {"duration": 60})
-        new_time = find_available_slot(events, target_event.get("duration", 60))
+        # Dynamic slot selection (date-aware)
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26"})
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"))
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.reschedule")
+    elif action == "move_to_next_day":
+        target = action_dict.get("target")
+        current_state, primary_response = move_to_next_day(current_state, target)
+        tools_used.append("calendar.move_to_next_day")
     elif action == "partial_attend":
         # Simulate partial attendance by reducing duration
         target = action_dict.get("target")
@@ -42,8 +46,8 @@ def execute_tool(action_dict, state):
     elif action == "delay_meeting":
         target = action_dict.get("target")
         # Dynamic delay (finding next available slot)
-        target_event = next((e for e in events if e["type"] == target), {"duration": 60})
-        new_time = find_available_slot(events, target_event.get("duration", 60))
+        target_event = next((e for e in events if e["type"] == target), {"duration": 60, "date": events[0].get("date") if events else "2026-04-26"})
+        new_time = find_available_slot(events, target_event.get("duration", 60), target_event.get("date"))
         
         current_state, primary_response = reschedule_event(current_state, target, new_time)
         tools_used.append("calendar.delay")
